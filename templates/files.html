@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Library - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('files') }}" class="active">Document Library</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('upload') }}">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Document Library</h1>
+                    <p class="subtext">Browse, search, filter, preview, and download documents.</p>
+                </div>
+                <div class="user-badge">
+                    <span>{{ session.get('username', 'User') }}</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="hero-card">
+                <div>
+                    <h2>Academic File Repository</h2>
+                    <p>
+                        Store and access course materials, notes, PDFs, assignments,
+                        and other academic resources in one organized portal.
+                    </p>
+                </div>
+            </section>
+
+            <section class="filter-card">
+                <form method="GET" class="filter-form">
+                    <div class="filter-group">
+                        <label for="search">Search Filename</label>
+                        <input type="text" id="search" name="search" value="{{ search_value }}" placeholder="Enter document name">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat['category'] }}" {% if selected_category == cat['category'] %}selected{% endif %}>
+                                {{ cat["category"] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn">Apply Filter</button>
+                        <a href="{{ url_for('files') }}" class="btn secondary">Reset</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="library-section">
+                <div class="section-head">
+                    <h2>Stored Files</h2>
+                </div>
+
+                {% if documents %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Filename</th>
+                                <th>Category</th>
+                                <th>Uploaded By</th>
+                                <th>Upload Date</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documents %}
+                            {% set ext = doc["filename"].split(".")[-1].lower() %}
+                            <tr>
+                                <td>{{ doc["id"] }}</td>
+                                <td>{{ doc["original_filename"] }}</td>
+                                <td>{{ doc["category"] }}</td>
+                                <td>{{ doc["uploaded_by"] }}</td>
+                                <td>{{ doc["upload_date"]|datetimeformat }}</td>
+                                <td>
+                                    {% if ext == "pdf" %}
+                                        PDF
+                                    {% elif ext == "doc" or ext == "docx" %}
+                                        Word
+                                    {% elif ext == "ppt" or ext == "pptx" %}
+                                        PowerPoint
+                                    {% elif ext == "txt" %}
+                                        Text
+                                    {% else %}
+                                        File
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ext == "pdf" %}
+                                        <a href="{{ url_for('preview', filename=doc['filename']) }}" class="btn secondary" target="_blank">Preview</a>
+                                    {% endif %}
+
+                                    <a href="{{ url_for('download', filename=doc['filename']) }}" class="btn">Download</a>
+
+                                    {% if session.get('role') == 'admin' %}
+                                    <form action="{{ url_for('delete_file', doc_id=doc['id']) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this document?');">
+                                        <button type="submit" class="btn danger">Delete</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No matching files found</h3>
+                    <p>Try another search term or category filter.</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

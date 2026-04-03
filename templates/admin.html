@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('files') }}">Document Library</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="{{ url_for('upload') }}">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}" class="active">Admin Panel</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Admin Panel</h1>
+                    <p class="subtext">Manage users, roles, passwords, and portal activity.</p>
+                </div>
+                <div class="user-badge">
+                    <span>Administrator</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <p>{{ total_users }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Documents</h3>
+                    <p>{{ total_docs }}</p>
+                </div>
+            </section>
+
+            <section class="notice-board">
+                <h2>User Management</h2>
+                {% if users %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Promote</th>
+                                <th>Demote</th>
+                                <th>Reset Password</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user["id"] }}</td>
+                                <td>{{ user["username"] }}</td>
+                                <td>{{ user["role"]|title }}</td>
+                                <td>{{ user["created_at"]|datetimeformat }}</td>
+                                <td>
+                                    {% if user["role"] != "admin" %}
+                                    <form action="{{ url_for('make_admin', user_id=user['id']) }}" method="POST">
+                                        <button type="submit" class="btn">Make Admin</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="muted-text">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user["username"] != "admin" and user["role"] == "admin" %}
+                                    <form action="{{ url_for('make_member', user_id=user['id']) }}" method="POST">
+                                        <button type="submit" class="btn secondary">Make Member</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="muted-text">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form action="{{ url_for('reset_password', user_id=user['id']) }}" method="POST" class="admin-password-form">
+                                        <input type="password" name="new_password" placeholder="New password" required>
+                                        <input type="password" name="confirm_password" placeholder="Confirm password" required>
+                                        <button type="submit" class="btn secondary">Reset Password</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    {% if user["username"] != "admin" %}
+                                    <form action="{{ url_for('delete_user', user_id=user['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                        <button type="submit" class="btn danger">Delete</button>
+                                    </form>
+                                    {% else %}
+                                    <span class="muted-text">Protected</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No users found</h3>
+                    <p>User records will appear here.</p>
+                </div>
+                {% endif %}
+            </section>
+
+            <section class="notice-board admin-space">
+                <h2>Recent Documents</h2>
+                {% if recent_documents %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Category</th>
+                                <th>Uploaded By</th>
+                                <th>Upload Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in recent_documents %}
+                            <tr>
+                                <td>{{ doc["original_filename"] }}</td>
+                                <td>{{ doc["category"] }}</td>
+                                <td>{{ doc["uploaded_by"] }}</td>
+                                <td>{{ doc["upload_date"]|datetimeformat }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No documents found</h3>
+                    <p>Recent document activity will appear here.</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

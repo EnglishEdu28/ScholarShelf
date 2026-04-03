@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <section class="auth-page">
+        <div class="auth-wrapper">
+            <div class="auth-left">
+                <div class="auth-brand">
+                    <h1>ScholarShelf</h1>
+                    <p class="auth-tag">Academic Document Portal</p>
+                </div>
+
+                <div class="auth-text">
+                    <h2>Create an Account</h2>
+                    <p>
+                        Register to become a member of the ScholarShelf portal
+                        and gain access to organized academic documents,
+                        downloadable files, and learning resources.
+                    </p>
+                </div>
+            </div>
+
+            <div class="auth-right">
+                <div class="auth-card">
+                    <h2>Register</h2>
+                    <p class="auth-subtext">Fill in your details to create an account.</p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <section class="flash-area">
+                                {% for category, message in messages %}
+                                    <div class="flash-message flash-{{ category }}">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            </section>
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+
+                        <button type="submit" class="btn auth-btn">Create Account</button>
+                    </form>
+
+                    <div class="auth-links">
+                        <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+                        <p><a href="{{ url_for('index') }}">Back to Home</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

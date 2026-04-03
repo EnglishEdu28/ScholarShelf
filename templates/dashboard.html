@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}" class="active">Dashboard</a>
+                    <a href="{{ url_for('files') }}">Document Library</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    {% if role == 'admin' %}
+                    <a href="{{ url_for('upload') }}">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Welcome, {{ username }}</h1>
+                    <p class="subtext">Manage and access your academic documents in one place.</p>
+                </div>
+                <div class="user-badge">
+                    <span>{{ role|title }}</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="hero-card">
+                <div>
+                    <h2>ScholarShelf Academic Portal</h2>
+                    <p>
+                        A secure portal for storing, organizing, previewing and downloading
+                        academic documents with proper categories
+                    </p>
+                </div>
+            </section>
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Documents</h3>
+                    <p>{{ total_docs }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <p>{{ total_users }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>My Uploads</h3>
+                    <p>{{ my_uploads }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Role</h3>
+                    <p>{{ role|title }}</p>
+                </div>
+            </section>
+
+            <section class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-grid">
+                    <a href="{{ url_for('files') }}" class="action-card">
+                        <h3>Document Library</h3>
+                        <p>Browse all uploaded files with categories, dates, previews, and downloads.</p>
+                    </a>
+
+                    <a href="{{ url_for('profile') }}" class="action-card">
+                        <h3>My Profile</h3>
+                        <p>View your account details and your recent document activity.</p>
+                    </a>
+
+                    {% if role == 'admin' %}
+                    <a href="{{ url_for('upload') }}" class="action-card">
+                        <h3>Upload Documents</h3>
+                        <p>Add categorized PDFs, lecture notes, slides, and other files.</p>
+                    </a>
+
+                    <a href="{{ url_for('admin_panel') }}" class="action-card">
+                        <h3>Admin Panel</h3>
+                        <p>Manage users, roles, and recent activities in the portal.</p>
+                    </a>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="notice-board">
+                <h2>Recent Uploads</h2>
+                {% if recent_documents %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Category</th>
+                                <th>Uploaded By</th>
+                                <th>Upload Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in recent_documents %}
+                            <tr>
+                                <td>{{ doc["original_filename"] }}</td>
+                                <td>{{ doc["category"] }}</td>
+                                <td>{{ doc["uploaded_by"] }}</td>
+                                <td>{{ doc["upload_date"]|datetimeformat }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No uploads yet</h3>
+                    <p>Recent uploaded documents will appear here.</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('files') }}">Document Library</a>
+                    <a href="{{ url_for('profile') }}" class="active">Profile</a>
+                    {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('upload') }}">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>My Profile</h1>
+                    <p class="subtext">View your account information and recent activity.</p>
+                </div>
+                <div class="user-badge">
+                    <span>{{ user["role"]|title }}</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Username</h3>
+                    <p>{{ user["username"] }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Role</h3>
+                    <p>{{ user["role"]|title }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Joined</h3>
+                    <p>{{ user["created_at"]|datetimeformat }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Uploads</h3>
+                    <p>{{ uploaded_count }}</p>
+                </div>
+            </section>
+
+            <section class="notice-board">
+                <h2>Recent Activity</h2>
+                {% if recent_user_docs %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Category</th>
+                                <th>Upload Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in recent_user_docs %}
+                            {% set ext = doc["filename"].split(".")[-1].lower() %}
+                            <tr>
+                                <td>{{ doc["original_filename"] }}</td>
+                                <td>{{ doc["category"] }}</td>
+                                <td>{{ doc["upload_date"]|datetimeformat }}</td>
+                                <td>
+                                    {% if ext == "pdf" %}
+                                    <a href="{{ url_for('viewer', doc_id=doc['id']) }}" class="btn secondary">Open</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('download', filename=doc['filename']) }}" class="btn">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <h3>No recent activity</h3>
+                    <p>Your recently uploaded documents will appear here.</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</body>
+</html>

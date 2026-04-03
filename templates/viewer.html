@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('files') }}">Document Library</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('upload') }}">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Document Viewer</h1>
+                    <p class="subtext">Preview your PDF directly inside the portal.</p>
+                </div>
+                <div class="user-badge">
+                    <span>{{ document["category"] }}</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="viewer-header-card">
+                <h2>{{ document["original_filename"] }}</h2>
+                <p>
+                    Uploaded by <strong>{{ document["uploaded_by"] }}</strong>
+                    on {{ document["upload_date"]|datetimeformat }}
+                </p>
+
+                <div class="viewer-actions">
+                    <a href="{{ url_for('download', filename=document['filename']) }}" class="btn">Download</a>
+                    <a href="{{ url_for('files') }}" class="btn secondary">Back to Library</a>
+                </div>
+            </section>
+
+            <section class="viewer-frame-card">
+                <iframe
+                    src="{{ url_for('preview', filename=document['filename']) }}"
+                    class="pdf-frame"
+                    title="PDF Viewer">
+                </iframe>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

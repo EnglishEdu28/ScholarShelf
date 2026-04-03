@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Documents - ScholarShelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="portal-layout">
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>ScholarShelf</h2>
+                    <p>Document Portal</p>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('files') }}">Document Library</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="{{ url_for('upload') }}" class="active">Upload Documents</a>
+                    <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>Upload Documents</h1>
+                    <p class="subtext">Add categorized documents to the portal for users to access.</p>
+                </div>
+                <div class="user-badge">
+                    <span>Admin Panel</span>
+                </div>
+            </header>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <section class="flash-area">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endwith %}
+
+            <section class="hero-card">
+                <div>
+                    <h2>Document Upload Center</h2>
+                    <p>
+                        Upload academic resources and assign each file to a proper category
+                        so the library remains organized and easy to search.
+                    </p>
+                </div>
+            </section>
+
+            <section class="upload-card">
+                <h2>Select File</h2>
+                <p>Supported formats: PDF, DOC, DOCX, PPT, PPTX, and TXT.</p>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <label for="category">Document Category</label>
+                    <select id="category" name="category" required>
+                        <option value="General">General</option>
+                        <option value="Lecture Note">Lecture Note</option>
+                        <option value="Assignment">Assignment</option>
+                        <option value="Past Question">Past Question</option>
+                        <option value="Handout">Handout</option>
+                        <option value="Research">Research</option>
+                        <option value="Project">Project</option>
+                        <option value="Presentation">Presentation</option>
+                    </select>
+
+                    <label for="file">Choose File</label>
+                    <input type="file" id="file" name="file" class="file-input" required>
+
+                    <div class="upload-actions">
+                        <button type="submit" class="btn">Upload File</button>
+                        <a href="{{ url_for('files') }}" class="btn secondary">View Library</a>
+                        <a href="{{ url_for('dashboard') }}" class="btn secondary">Back to Dashboard</a>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
